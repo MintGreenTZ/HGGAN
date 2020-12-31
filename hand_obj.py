@@ -5,6 +5,15 @@ import numpy as np
 
 HO3D = HO3DV2(split="trainval", like_v1=False)
 
+print(HO3D.fulls)
+print(type(HO3D.fulls))
+print(len(HO3D.fulls))
+print(HO3D.fulls[0])
+print(type(HO3D.idxs))
+# print(HO3D.idxs)
+print(len(HO3D.idxs))
+print(len(HO3D.idxs[0]))
+
 rot, trans = HO3D.get_obj_pose(0)
 # objTrans: A 3x1 vector representing object translation
 # objRot: A 3x1 vector representing object rotation in Rodrigues representation
