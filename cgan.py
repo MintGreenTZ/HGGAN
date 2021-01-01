@@ -7,14 +7,15 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 from torch.autograd import Variable
-from tensorflow.examples.tutorials.mnist import input_data
 
+from pose_loader import Pose_Loader
 
-mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
+ho3d = Pose_Loader()
+
 mb_size = 64
 Z_dim = 100
-X_dim = mnist.train.images.shape[1]
-y_dim = mnist.train.labels.shape[1]
+X_dim = ho3d.get_true_pose_shape()
+y_dim = ho3d.get_condition_shape()
 h_dim = 128
 cnt = 0
 lr = 1e-3
@@ -83,7 +84,7 @@ zeros_label = Variable(torch.zeros(mb_size, 1))
 for it in range(100000):
     # Sample data
     z = Variable(torch.randn(mb_size, Z_dim))
-    X, c = mnist.train.next_batch(mb_size)
+    X, c = ho3d.next_batch(mb_size)
     X = Variable(torch.from_numpy(X))
     c = Variable(torch.from_numpy(c.astype('float32')))
 
@@ -100,7 +101,7 @@ for it in range(100000):
     D_solver.step()
 
     # Housekeeping - reset gradient
-    reset_grad()
+    # reset_grad()
 
     # Generator forward-loss-backward-update
     z = Variable(torch.randn(mb_size, Z_dim))
@@ -113,32 +114,32 @@ for it in range(100000):
     G_solver.step()
 
     # Housekeeping - reset gradient
-    reset_grad()
+    # reset_grad()
 
     # Print and plot every now and then
-    if it % 1000 == 0:
+    if it % 100 == 0:
         print('Iter-{}; D_loss: {}; G_loss: {}'.format(it, D_loss.data.numpy(), G_loss.data.numpy()))
 
-        c = np.zeros(shape=[mb_size, y_dim], dtype='float32')
-        c[:, np.random.randint(0, 10)] = 1.
-        c = Variable(torch.from_numpy(c))
-        samples = G(z, c).data.numpy()[:16]
+        # c = np.zeros(shape=[mb_size, y_dim], dtype='float32')
+        # c[:, np.random.randint(0, 10)] = 1.
+        # c = Variable(torch.from_numpy(c))
+        # samples = G(z, c).data.numpy()[:16]
 
-        fig = plt.figure(figsize=(4, 4))
-        gs = gridspec.GridSpec(4, 4)
-        gs.update(wspace=0.05, hspace=0.05)
+        # fig = plt.figure(figsize=(4, 4))
+        # gs = gridspec.GridSpec(4, 4)
+        # gs.update(wspace=0.05, hspace=0.05)
 
-        for i, sample in enumerate(samples):
-            ax = plt.subplot(gs[i])
-            plt.axis('off')
-            ax.set_xticklabels([])
-            ax.set_yticklabels([])
-            ax.set_aspect('equal')
-            plt.imshow(sample.reshape(28, 28), cmap='Greys_r')
+        # for i, sample in enumerate(samples):
+        #     ax = plt.subplot(gs[i])
+        #     plt.axis('off')
+        #     ax.set_xticklabels([])
+        #     ax.set_yticklabels([])
+        #     ax.set_aspect('equal')
+        #     plt.imshow(sample.reshape(28, 28), cmap='Greys_r')
 
-        if not os.path.exists('out/'):
-            os.makedirs('out/')
+        # if not os.path.exists('out/'):
+        #     os.makedirs('out/')
 
-        plt.savefig('out/{}.png'.format(str(cnt).zfill(3)), bbox_inches='tight')
-        cnt += 1
-        plt.close(fig)
+        # plt.savefig('out/{}.png'.format(str(cnt).zfill(3)), bbox_inches='tight')
+        # cnt += 1
+        # plt.close(fig)
