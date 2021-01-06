@@ -1,3 +1,5 @@
+# modify from https://github.com/wiseodd/generative-models/blob/master/GAN/conditional_gan/cgan_pytorch.py
+
 import torch
 import torch.nn.functional as nn
 import torch.autograd as autograd
@@ -10,16 +12,19 @@ from torch.autograd import Variable
 
 from pose_loader import Pose_Loader
 
+import datetime
+import dateutil
+import dateutil.tz
+
 ho3d = Pose_Loader()
 
 mb_size = 64
 Z_dim = 100
-X_dim = ho3d.get_true_pose_shape()
-y_dim = ho3d.get_condition_shape()
+X_dim = ho3d.get_true_pose_shape()[0]
+y_dim = ho3d.get_condition_shape()[0]
 h_dim = 128
 cnt = 0
 lr = 1e-3
-
 
 def xavier_init(size):
     in_dim = size[0]
@@ -80,8 +85,23 @@ D_solver = optim.Adam(D_params, lr=1e-3)
 ones_label = Variable(torch.ones(mb_size, 1))
 zeros_label = Variable(torch.zeros(mb_size, 1))
 
+def ensure_dir(aim_dir):
+    if not os.path.exists(aim_dir):
+        os.makedirs(aim_dir)
 
-for it in range(100000):
+def align_number(number, bit = 6):
+    out = str(number)
+    while len(out) < bit:
+        out = "0" + out
+    return out
+
+output_dir = "./output"
+ensure_dir(output_dir)
+now = datetime.datetime.now(dateutil.tz.tzlocal())
+timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
+save_dir = os.path.join(output_dir, timestamp)
+ensure_dir(save_dir)
+for epoch in range(1):
     # Sample data
     z = Variable(torch.randn(mb_size, Z_dim))
     X, c = ho3d.next_batch(mb_size)
@@ -101,7 +121,7 @@ for it in range(100000):
     D_solver.step()
 
     # Housekeeping - reset gradient
-    # reset_grad()
+    reset_grad()
 
     # Generator forward-loss-backward-update
     z = Variable(torch.randn(mb_size, Z_dim))
@@ -114,12 +134,16 @@ for it in range(100000):
     G_solver.step()
 
     # Housekeeping - reset gradient
-    # reset_grad()
+    reset_grad()
 
     # Print and plot every now and then
-    if it % 100 == 0:
+    if epoch % 1 == 0:
         print('Iter-{}; D_loss: {}; G_loss: {}'.format(it, D_loss.data.numpy(), G_loss.data.numpy()))
 
+        cur_save_dir = os.path.join(save_dir, align_number(epoch))
+        ensure_dir(save_dir, cur_save_dir)
+
+        print(D_fake)
         # c = np.zeros(shape=[mb_size, y_dim], dtype='float32')
         # c[:, np.random.randint(0, 10)] = 1.
         # c = Variable(torch.from_numpy(c))
