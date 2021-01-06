@@ -32,7 +32,7 @@ class HO3DV2:
         super().__init__()
         self.split_mode = split_mode
         if split_mode == "paper" and mode == "weak":
-            raise ValueError(f"split mode {split_mode} incompatible will mode {mode} != full")
+            raise ValueError(f"split mode {split_mode} imcompatible will mode {mode} != full")
 
         self.name = "ho3dv2"
         self.full_sequences = full_sequences
@@ -501,3 +501,11 @@ class HO3DV2:
         hom_2d = np.array(cam_intr).dot(points3d.transpose()).transpose()
         points2d = (hom_2d / hom_2d[:, 2:])[:, :2]
         return points2d.astype(np.float32)
+
+    def get_obj_name(self, idx):
+        idx = self.get_dataidx(idx)
+        seq, img_idx = self.idxs[idx]
+        annot = self.seq_map[seq][img_idx]
+        name = annot["objName"]
+        obj_idx = int(name[0:name.find("_")])
+        return obj_idx, name
