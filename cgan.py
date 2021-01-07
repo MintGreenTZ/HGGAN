@@ -12,6 +12,8 @@ from torch.autograd import Variable
 
 from pose_loader import Pose_Loader
 
+from display import show_hand_mano
+
 import datetime
 import dateutil
 import dateutil.tz
@@ -25,6 +27,9 @@ y_dim = ho3d.get_condition_shape()[0]
 h_dim = 128
 cnt = 0
 lr = 1e-3
+print("Z_dim " + str(Z_dim))
+print("X_dim " + str(X_dim))
+print("y_dim " + str(y_dim))
 
 def xavier_init(size):
     in_dim = size[0]
@@ -109,6 +114,8 @@ for epoch in range(1):
     c = Variable(torch.from_numpy(c.astype('float32')))
 
     # Dicriminator forward-loss-backward-update
+    print(z.shape)
+    print(c.shape)
     G_sample = G(z, c)
     D_real = D(X, c)
     D_fake = D(G_sample, c)
@@ -138,32 +145,22 @@ for epoch in range(1):
 
     # Print and plot every now and then
     if epoch % 1 == 0:
-        print('Iter-{}; D_loss: {}; G_loss: {}'.format(it, D_loss.data.numpy(), G_loss.data.numpy()))
+        print('Epoch-{}; D_loss: {}; G_loss: {}'.format(epoch, D_loss.data.numpy(), G_loss.data.numpy()))
 
         cur_save_dir = os.path.join(save_dir, align_number(epoch))
-        ensure_dir(save_dir, cur_save_dir)
+        ensure_dir(cur_save_dir)
 
-        print(D_fake)
-        # c = np.zeros(shape=[mb_size, y_dim], dtype='float32')
-        # c[:, np.random.randint(0, 10)] = 1.
-        # c = Variable(torch.from_numpy(c))
-        # samples = G(z, c).data.numpy()[:16]
+        print(c.shape)
+        print(G_sample.shape)
 
-        # fig = plt.figure(figsize=(4, 4))
-        # gs = gridspec.GridSpec(4, 4)
-        # gs.update(wspace=0.05, hspace=0.05)
-
-        # for i, sample in enumerate(samples):
-        #     ax = plt.subplot(gs[i])
-        #     plt.axis('off')
-        #     ax.set_xticklabels([])
-        #     ax.set_yticklabels([])
-        #     ax.set_aspect('equal')
-        #     plt.imshow(sample.reshape(28, 28), cmap='Greys_r')
-
-        # if not os.path.exists('out/'):
-        #     os.makedirs('out/')
-
-        # plt.savefig('out/{}.png'.format(str(cnt).zfill(3)), bbox_inches='tight')
-        # cnt += 1
-        # plt.close(fig)
+        N = G_sample.shape[0]
+        for i in range(N):
+            obj_idx, obj_cloud = ho3d.get_obj(int(c[i][0]))
+            save_file_name = os.path.join(cur_save_dir, "output_" + align_number(i, 3) + ".png")
+            # show_hand_mano(np.zeros(48),np.zeros(3),np.zeros(10), obj_cloud, save_file_name)
+            sample = G_sample[i].detach().numpy()
+            print(type(obj_cloud))
+            print(obj_cloud)
+            print(obj_cloud.shape)
+            obj_cloud = np.random.randn(262146, 3)
+            show_hand_mano(sample[0:48], sample[48:51], sample[51:61], obj_cloud, save_file_name)

@@ -10,10 +10,10 @@ from manopth.manolayer import ManoLayer
 # Use output_path='' to modify the output.
 # Exsample:
 # show_hand_mano(np.zeros(48),np.zeros(3),np.zeros(10))
-def show_hand_mano(handpose, handtrans, handbeta, object=None,mano_root='assets/mano',output_path='test.png'):
+def show_hand_mano(handpose, handtrans, handbeta, object=None, output_path='test.png', mano_root='assets/mano'):
     Info=trans_hand_verts(handpose, handtrans, handbeta)
     mano_layer=ManoLayer(mano_root=mano_root)
-    display_hand(Info,mano_faces=mano_layer.th_faces,alpha=0.5,show=False,output_path=output_path, object=object)
+    display_hand(Info, mano_faces=mano_layer.th_faces, alpha=0.5, show=False, output_path=output_path, object=object)
 
 def display_hand(hand_info, mano_faces=None, ax=None, alpha=0.2, batch_idx=0, show=True, output_path='test.png', object=None):
     """

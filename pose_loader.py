@@ -28,7 +28,6 @@ class Pose_Loader:
 		self.length = len(self.filtered_list)
 		self.condition = np.stack([self.get_condition(i) for i in range(self.length)])
 		self.true_pose = np.stack([self.get_true_pose(i) for i in range(self.length)])
-		self.data = zip(self.condition, self.true_pose)
 		self.pointer = 0
 
 	def __len__(self):
@@ -71,7 +70,10 @@ class Pose_Loader:
 
 	def next_batch(self, batch_size = 64):
 		if self.pointer + batch_size > self.length:
+			data = zip(self.condition, self.true_pose)
 			random.shuffle(self.data)
+			self.condition, self.true_pose = data
 			self.pointer = 0
 		self.pointer += batch_size
-		return self.data[self.pointer - batch_size: self.pointer]
+		return self.true_pose[self.pointer - batch_size: self.pointer], \
+			self.condition[self.pointer - batch_size: self.pointer]
