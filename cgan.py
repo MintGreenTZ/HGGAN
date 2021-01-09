@@ -162,5 +162,5 @@ for epoch in range(1):
             print(type(obj_cloud))
             print(obj_cloud)
             print(obj_cloud.shape)
-            obj_cloud = np.random.randn(262146, 3)
+            # obj_cloud = np.random.randn(262146, 3)
             show_hand_mano(sample[0:48], sample[48:51], sample[51:61], obj_cloud, save_file_name)
