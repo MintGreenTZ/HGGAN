@@ -106,7 +106,7 @@ now = datetime.datetime.now(dateutil.tz.tzlocal())
 timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
 save_dir = os.path.join(output_dir, timestamp)
 ensure_dir(save_dir)
-for epoch in range(1):
+for epoch in range(1000):
     # Sample data
     z = Variable(torch.randn(mb_size, Z_dim))
     X, c = ho3d.next_batch(mb_size)
@@ -144,7 +144,7 @@ for epoch in range(1):
     reset_grad()
 
     # Print and plot every now and then
-    if epoch % 1 == 0:
+    if epoch % 20 == 0:
         print('Epoch-{}; D_loss: {}; G_loss: {}'.format(epoch, D_loss.data.numpy(), G_loss.data.numpy()))
 
         cur_save_dir = os.path.join(save_dir, align_number(epoch))
